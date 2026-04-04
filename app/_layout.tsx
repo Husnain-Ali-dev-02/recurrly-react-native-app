@@ -13,12 +13,12 @@ export default function RootLayout() {
     'sans-light': require('../assets/fonts/PlusJakartaSans-Light.ttf')
   });
 
-  useEffect(() =>{
-    if (!fontsLoaded) {
+   useEffect(() =>{
+    if (fontsLoaded) {
       SplashScreen.hideAsync()
     }
   }, [fontsLoaded])
 
   if(!fontsLoaded) return null;
-  return <Stack screenOptions={{headerShown: false}}/>;;
+  return <Stack screenOptions={{headerShown: false}}/>;
 }

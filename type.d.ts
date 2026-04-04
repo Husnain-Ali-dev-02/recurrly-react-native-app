@@ -48,9 +48,10 @@ declare global {
     interface UpcomingSubscriptionCardProps
         extends Omit<UpcomingSubscription, "id"> {}
 
-    interface ListHeadingProps {
-        title: string;
-    }
+   interface ListHeadingProps {
+    title: string;
+    onViewAll?: () => void;
+}
 }
 
 export {};
