@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import ListHeading from "@/components/ListHeading";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import SubscriptionCard from "@/components/SubscriptionCard";
-// import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import { useState, useMemo } from "react";
 import { useUser } from "@clerk/expo";
 import { usePostHog } from "posthog-react-native";
@@ -111,7 +111,7 @@ export default function App() {
               <FlatList
                 data={upcomingSubscriptions}
                 renderItem={({ item }) => (
-                  // <UpcomingSubscriptionCard {...item} />
+                  <UpcomingSubscriptionCard {...item} />
                 )}
                 keyExtractor={(item) => item.id}
                 horizontal
@@ -145,11 +145,11 @@ export default function App() {
         contentContainerClassName="pb-30"
       />
 
-      {/* <CreateSubscriptionModal
+      <CreateSubscriptionModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         onSubmit={handleCreateSubscription}
-      /> */}
+      />
     </SafeAreaView>
   );
 }
