@@ -1,20 +1,19 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
+import ListHeading from "@/components/ListHeading";
+import SubscriptionCard from "@/components/SubscriptionCard";
+import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
+import { HOME_BALANCE } from "@/constants/data";
+import images from "@/constants/images";
 import "@/global.css";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@clerk/expo";
+import dayjs from "dayjs";
+import { styled } from "nativewind";
+import { usePostHog } from "posthog-react-native";
+import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { styled } from "nativewind";
-import images from "@/constants/images";
-import { HOME_BALANCE } from "@/constants/data";
-import { icons } from "@/constants/icons";
-import { formatCurrency } from "@/lib/utils";
-import dayjs from "dayjs";
-import ListHeading from "@/components/ListHeading";
-import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import SubscriptionCard from "@/components/SubscriptionCard";
-import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
-import { useState, useMemo } from "react";
-import { useUser } from "@clerk/expo";
-import { usePostHog } from "posthog-react-native";
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
 const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
@@ -37,7 +36,15 @@ export default function App() {
           dayjs(sub.renewalDate).isAfter(now) &&
           dayjs(sub.renewalDate).isBefore(nextWeek),
       )
-      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)))
+      .map((sub) => ({
+        id: sub.id,
+        icon: sub.icon,
+        name: sub.name,
+        price: sub.price,
+        currency: sub.currency,
+        daysLeft: dayjs(sub.renewalDate).diff(now, "day"),
+      }));
   }, [subscriptions]);
 
   const handleSubscriptionPress = (item: Subscription) => {
@@ -59,8 +66,8 @@ export default function App() {
     posthog.capture("subscription_created", {
       subscription_name: newSubscription.name,
       subscription_price: newSubscription.price,
-      // subscription_frequency: newSubscription.frequency,
-      // subscription_category: newSubscription.category,
+      subscription_frequency: newSubscription.frequency || "unknown",
+      subscription_category: newSubscription.category || "other",
     });
   };
 
@@ -72,26 +79,36 @@ export default function App() {
     "User";
 
   return (
-    <SafeAreaView className="flex-1 bg-background p-5">
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="home-header px-5 pt-5">
+        <View className="home-user">
+          <Image
+            source={user?.imageUrl ? { uri: user.imageUrl } : images.avatar}
+            className="home-avatar"
+          />
+          <Text className="home-user-name">{displayName}</Text>
+        </View>
+
+        <Pressable
+          onPress={() => setIsModalVisible(true)}
+          style={{
+            width: 48,
+            height: 48,
+            backgroundColor: "#ea7a53",
+            borderRadius: 24,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 24, fontWeight: "bold" }}>
+            +
+          </Text>
+        </Pressable>
+      </View>
+
       <FlatList
         ListHeaderComponent={() => (
           <>
-            <View className="home-header">
-              <View className="home-user">
-                <Image
-                  source={
-                    user?.imageUrl ? { uri: user.imageUrl } : images.avatar
-                  }
-                  className="home-avatar"
-                />
-                <Text className="home-user-name">{displayName}</Text>
-              </View>
-
-              <Pressable onPress={() => setIsModalVisible(true)}>
-                <Image source={icons.add} className="home-add-icon" />
-              </Pressable>
-            </View>
-
             <View className="home-balance-card">
               <Text className="home-balance-label">Balance</Text>
 
@@ -143,6 +160,7 @@ export default function App() {
           <Text className="home-empty-state">No subscriptions yet.</Text>
         }
         contentContainerClassName="pb-30"
+        className="px-5"
       />
 
       <CreateSubscriptionModal
