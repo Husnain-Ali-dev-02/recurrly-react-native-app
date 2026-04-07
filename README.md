@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+<div align="center">
+  <img src="assets/readme/banner.png" alt="Recurrly Banner" />
+  
+  <h2>📊 Recurrly - Subscription Management App</h2>
+  <p>A modern full-stack mobile application to track, manage, and analyze subscriptions.</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+  <br/>
 
-## Get started
+  <!-- Tech Badges -->
+  <img src="https://img.shields.io/badge/React_Native-61DAFB?style=for-the-badge&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" />
+  <img src="https://img.shields.io/badge/NativeWind-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <br/>
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" />
+  <br/>
+  <img src="https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/PostHog-F0AD4E?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/CodeRabbit-FF5100?style=for-the-badge" />
+</div>
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 📋 Table of Contents
 
-2. Start the app
+1. ✨ Introduction  
+2. ⚙️ Tech Stack  
+3. 🔥 Features  
+4. 🚀 Quick Start  
+5. 🔐 Environment Variables  
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## ✨ Introduction
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+**Recurrly** is a full-stack subscription management mobile application that helps users monitor, analyze, and control recurring expenses in one centralized dashboard.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+It provides smart insights, analytics, and reminders so users never miss a payment and can optimize their spending habits.
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## ⚙️ Tech Stack
+
+### 📱 Frontend
+- React Native
+- Expo
+- TypeScript
+- NativeWind (Tailwind CSS for mobile)
+
+### 🖥️ Backend
+- Node.js
+- Express.js
+- MongoDB
+
+### 🔧 Tools & Services
+- Clerk (Authentication)
+- PostHog (Analytics)
+- CodeRabbit (AI Code Review)
+
+---
+
+## 🔥 Features
+
+### 📊 Dashboard
+- View all subscriptions in one place
+- Track active & inactive subscriptions
+
+### 💰 Expense Tracking
+- Monthly & yearly spending overview
+- Category-based expense breakdown
+
+### 📈 Insights & Analytics
+- Spending trends (charts & graphs)
+- Smart recommendations to save money
+
+### 🔔 Smart Reminders
+- Get notified before subscription renewals
+
+### 🔐 Authentication
+- Secure login & user management with Clerk
+
+### ⚡ Performance
+- Smooth native experience using Expo
+- Optimized API handling with Node.js
+
+---
+
+## 🚀 Quick Start
+
+### ✅ Prerequisites
+
+Make sure you have installed:
+
+- Node.js
+- npm / yarn
+- Expo CLI
+
+---
+
+### 📦 Installation
 
 ```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+git clone https://github.com/YOUR_USERNAME/recurrly-app.git
+cd recurrly-app
+npm install
