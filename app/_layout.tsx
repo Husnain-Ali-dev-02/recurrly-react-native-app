@@ -26,7 +26,19 @@ function RootLayoutContent() {
   const params = useGlobalSearchParams();
   const previousPathname = useRef<string | undefined>(undefined);
 
+  const [fontsLoaded] = useFonts({
+    "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
+    "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
+    "sans-medium": require("../assets/fonts/PlusJakartaSans-Medium.ttf"),
+    "sans-semibold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
+    "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
+    "sans-light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
+  });
+
   useEffect(() => {
+    // Only track screen changes after auth and fonts are loaded
+    if (!authLoaded || !fontsLoaded) return;
+
     if (previousPathname.current !== pathname) {
       // Filter route params to avoid leaking sensitive data
       const sanitizedParams = Object.keys(params).reduce(
@@ -46,16 +58,7 @@ function RootLayoutContent() {
       });
       previousPathname.current = pathname;
     }
-  }, [pathname, params]);
-
-  const [fontsLoaded] = useFonts({
-    "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
-    "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
-    "sans-medium": require("../assets/fonts/PlusJakartaSans-Medium.ttf"),
-    "sans-semibold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
-    "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
-    "sans-light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
-  });
+  }, [pathname, params, authLoaded, fontsLoaded]);
 
   useEffect(() => {
     // Hide splash only when both fonts and auth are loaded

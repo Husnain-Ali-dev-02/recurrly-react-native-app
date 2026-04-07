@@ -1,10 +1,3 @@
-import {
-    BUDGET_VS_ACTUAL,
-    CATEGORY_SPENDING_DATA,
-    LAST_6_MONTHS_DATA,
-    MONTHLY_SPENDING_DATA,
-    SUBSCRIPTION_WISE_SPENDING,
-} from "@/constants/data";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { styled } from "nativewind";
 import { useMemo } from "react";
@@ -45,17 +38,134 @@ const Insights = () => {
   const totalMonthlySpending = useMemo(() => {
     return subscriptions
       .filter((sub) => sub.status === "active")
-      .reduce((sum, sub) => sum + sub.price, 0);
+      .reduce((sum, sub) => {
+        // Normalize price to monthly equivalent
+        const monthlyPrice =
+          sub.billing === "Yearly" ? sub.price / 12 : sub.price;
+        return sum + monthlyPrice;
+      }, 0);
   }, [subscriptions]);
 
   const categoryBreakdown = useMemo(() => {
     const breakdown: { [key: string]: number } = {};
     subscriptions.forEach((sub) => {
       if (sub.category) {
-        breakdown[sub.category] = (breakdown[sub.category] || 0) + sub.price;
+        // Normalize price to monthly equivalent
+        const monthlyPrice =
+          sub.billing === "Yearly" ? sub.price / 12 : sub.price;
+        breakdown[sub.category] = (breakdown[sub.category] || 0) + monthlyPrice;
       }
     });
     return breakdown;
+  }, [subscriptions]);
+
+  // Derive chart data from subscriptions
+  const monthlySpendingData = useMemo(() => {
+    // Generate last 12 months of data
+    const now = new Date();
+    const months = [];
+    const data = [];
+
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = date.toLocaleString("default", { month: "short" });
+      months.push(i % 2 === 0 ? monthLabel : ""); // Show every 2nd month
+      data.push(totalMonthlySpending); // Use consistent spending for demo
+    }
+
+    return {
+      labels: months,
+      datasets: [
+        {
+          data,
+          strokeWidth: 2,
+          color: () => "#ea7a53",
+        },
+      ],
+    };
+  }, [totalMonthlySpending]);
+
+  // Category data for pie chart
+  const categoryChartData = useMemo(() => {
+    const categoryColors: { [key: string]: string } = {
+      Design: "#ea7a53",
+      "Developer Tools": "#8fd1bd",
+      "AI Tools": "#f5c542",
+      Other: "#b8d4e3",
+      Entertainment: "#ea7a53",
+      Productivity: "#8fd1bd",
+      Health: "#f5c542",
+    };
+
+    return Object.entries(categoryBreakdown).map((entry, idx) => {
+      const total = Object.values(categoryBreakdown).reduce((a, b) => a + b, 0);
+      const percentage = Math.round((entry[1] / total) * 100);
+      return {
+        name: entry[0],
+        population: percentage,
+        color: categoryColors[entry[0]] || "#b8d4e3",
+        legendFontColor: "#081126",
+      };
+    });
+  }, [categoryBreakdown]);
+
+  // Last 6 months data
+  const last6MonthsData = useMemo(() => {
+    return {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [
+        {
+          data: [
+            totalMonthlySpending,
+            totalMonthlySpending,
+            totalMonthlySpending,
+            totalMonthlySpending,
+            totalMonthlySpending,
+            totalMonthlySpending,
+          ],
+          color: () => "#8fd1bd",
+          strokeWidth: 2,
+        },
+      ],
+    };
+  }, [totalMonthlySpending]);
+
+  // Budget vs actual
+  const budgetVsActual = useMemo(() => {
+    const budgetLimit = 400; // $400 monthly budget
+    return {
+      labels: ["Budget", "Actual"],
+      datasets: [
+        {
+          data: [budgetLimit, totalMonthlySpending],
+          color: () => "#081126",
+        },
+      ],
+    };
+  }, [totalMonthlySpending]);
+
+  // Subscription-wise spending
+  const subscriptionWiseData = useMemo(() => {
+    const activeSubscriptions = subscriptions.filter(
+      (sub) => sub.status === "active",
+    );
+    const colors: { [key: string]: string } = {
+      Netflix: "#ea7a53",
+      Spotify: "#1DB954",
+      "Adobe Creative Cloud": "#FF0000",
+      "GitHub Pro": "#1f6feb",
+      "Claude Pro": "#b8d4e3",
+      Figma: "#a259ff",
+      Notion: "#00d4ff",
+    };
+
+    return {
+      labels: activeSubscriptions.map((sub) => sub.name),
+      data: activeSubscriptions.map((sub) =>
+        sub.billing === "Yearly" ? sub.price / 12 : sub.price,
+      ),
+      colors: activeSubscriptions.map((sub) => colors[sub.name] || "#c0c0c0"),
+    };
   }, [subscriptions]);
 
   return (
@@ -80,7 +190,7 @@ const Insights = () => {
             📈 Monthly Spending Trend
           </ChartTitle>
           <LineChart
-            data={MONTHLY_SPENDING_DATA}
+            data={monthlySpendingData}
             width={chartWidth}
             height={240}
             chartConfig={chartConfig}
@@ -108,7 +218,7 @@ const Insights = () => {
           </ChartTitle>
           <View className="items-center mb-4">
             <PieChart
-              data={CATEGORY_SPENDING_DATA.data}
+              data={categoryChartData}
               width={pieChartWidth}
               height={180}
               chartConfig={chartConfig}
@@ -119,7 +229,7 @@ const Insights = () => {
             />
           </View>
           <View className="flex-row flex-wrap justify-center gap-3">
-            {CATEGORY_SPENDING_DATA.data.map((item, idx) => (
+            {categoryChartData.map((item, idx) => (
               <View key={item.name} className="flex-row items-center gap-2">
                 <View
                   className="w-3 h-3 rounded-full"
@@ -141,7 +251,7 @@ const Insights = () => {
             📊 Last 6 Months Comparison
           </ChartTitle>
           <BarChart
-            data={LAST_6_MONTHS_DATA}
+            data={last6MonthsData}
             width={chartWidth}
             height={220}
             chartConfig={chartConfig}
@@ -160,7 +270,7 @@ const Insights = () => {
             💰 Budget vs Actual Spending
           </ChartTitle>
           <BarChart
-            data={BUDGET_VS_ACTUAL}
+            data={budgetVsActual}
             width={chartWidth}
             height={220}
             chartConfig={chartConfig}
@@ -180,7 +290,7 @@ const Insights = () => {
             <View className="flex-row items-center gap-2">
               <View className="w-4 h-4 rounded bg-subscription" />
               <Text className="text-sm font-semibold text-foreground">
-                Actual: $372.1
+                Actual: ${totalMonthlySpending.toFixed(2)}
               </Text>
             </View>
           </View>
@@ -193,10 +303,10 @@ const Insights = () => {
           </ChartTitle>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View>
-              {SUBSCRIPTION_WISE_SPENDING.labels.map((label, idx) => {
-                const maxValue = Math.max(...SUBSCRIPTION_WISE_SPENDING.data);
+              {subscriptionWiseData.labels.map((label, idx) => {
+                const maxValue = Math.max(...subscriptionWiseData.data);
                 const percentage =
-                  (SUBSCRIPTION_WISE_SPENDING.data[idx] / maxValue) * 100;
+                  (subscriptionWiseData.data[idx] / maxValue) * 100;
                 return (
                   <View key={label} className="mb-4 mr-2">
                     <View className="flex-row items-center gap-2 mb-1">
@@ -204,7 +314,7 @@ const Insights = () => {
                         {label}
                       </Text>
                       <Text className="text-xs text-foreground opacity-60">
-                        ${SUBSCRIPTION_WISE_SPENDING.data[idx].toFixed(2)}
+                        ${subscriptionWiseData.data[idx].toFixed(2)}
                       </Text>
                     </View>
                     <View className="h-6 bg-muted rounded-lg overflow-hidden">
@@ -212,8 +322,7 @@ const Insights = () => {
                         className="h-full rounded-lg"
                         style={{
                           width: `${percentage}%`,
-                          backgroundColor:
-                            SUBSCRIPTION_WISE_SPENDING.colors[idx],
+                          backgroundColor: subscriptionWiseData.colors[idx],
                         }}
                       />
                     </View>
@@ -239,7 +348,7 @@ const Insights = () => {
             />
             <StatBox
               label="Avg Monthly Spend"
-              value={`$${(totalMonthlySpending / 12).toFixed(2)}`}
+              value={`$${totalMonthlySpending.toFixed(2)}`}
               color="#ea7a53"
             />
             <StatBox

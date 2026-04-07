@@ -120,7 +120,10 @@ const CreateSubscriptionModal = ({
         keyboardVerticalOffset={0}
       >
         <Pressable className="modal-overlay" onPress={handleClose}>
-          <Pressable className="modal-container" onPress={() => {}}>
+           <Pressable
+            className="modal-container"
+            onPress={(e) => e.stopPropagation()}
+          >
             <View className="modal-header">
               <Text className="modal-title">New Subscription</Text>
               <Pressable className="modal-close" onPress={handleClose}>
