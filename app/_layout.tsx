@@ -1,22 +1,27 @@
-import {SplashScreen, Stack, usePathname, useGlobalSearchParams} from "expo-router";
-import '@/global.css';
-import {useFonts} from "expo-font";
-import {useEffect, useRef} from "react";
-import { ClerkProvider, useAuth } from '@clerk/expo';
-import { tokenCache } from '@clerk/expo/token-cache';
-import { PostHogProvider } from 'posthog-react-native';
-import { posthog } from '../src/config/posthog';
+import "@/global.css";
+import { ClerkProvider, useAuth } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
+import { useFonts } from "expo-font";
+import {
+  SplashScreen,
+  Stack,
+  useGlobalSearchParams,
+  usePathname,
+} from "expo-router";
+import { PostHogProvider } from "posthog-react-native";
+import { useEffect, useRef } from "react";
+import { posthog } from "../src/config/posthog";
 
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 if (!publishableKey) {
-  throw new Error('Add your Clerk Publishable Key to the .env file');
+  throw new Error("Add your Clerk Publishable Key to the .env file");
 }
 
 function RootLayoutContent() {
-  const { isLoaded: authLoaded } = useAuth();
+  const { isLoaded: authLoaded, sessionId } = useAuth();
   const pathname = usePathname();
   const params = useGlobalSearchParams();
   const previousPathname = useRef<string | undefined>(undefined);
@@ -24,13 +29,16 @@ function RootLayoutContent() {
   useEffect(() => {
     if (previousPathname.current !== pathname) {
       // Filter route params to avoid leaking sensitive data
-      const sanitizedParams = Object.keys(params).reduce((acc, key) => {
-        // Only include specific safe params
-        if (['id', 'tab', 'view'].includes(key)) {
-          acc[key] = params[key];
-        }
-        return acc;
-      }, {} as Record<string, string | string[]>);
+      const sanitizedParams = Object.keys(params).reduce(
+        (acc, key) => {
+          // Only include specific safe params
+          if (["id", "tab", "view"].includes(key)) {
+            acc[key] = params[key];
+          }
+          return acc;
+        },
+        {} as Record<string, string | string[]>,
+      );
 
       posthog.screen(pathname, {
         previous_screen: previousPathname.current ?? null,
@@ -41,25 +49,35 @@ function RootLayoutContent() {
   }, [pathname, params]);
 
   const [fontsLoaded] = useFonts({
-    'sans-regular': require('../assets/fonts/PlusJakartaSans-Regular.ttf'),
-    'sans-bold': require('../assets/fonts/PlusJakartaSans-Bold.ttf'),
-    'sans-medium': require('../assets/fonts/PlusJakartaSans-Medium.ttf'),
-    'sans-semibold': require('../assets/fonts/PlusJakartaSans-SemiBold.ttf'),
-    'sans-extrabold': require('../assets/fonts/PlusJakartaSans-ExtraBold.ttf'),
-    'sans-light': require('../assets/fonts/PlusJakartaSans-Light.ttf')
-  })
+    "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
+    "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
+    "sans-medium": require("../assets/fonts/PlusJakartaSans-Medium.ttf"),
+    "sans-semibold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
+    "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
+    "sans-light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
+  });
 
   useEffect(() => {
     // Hide splash only when both fonts and auth are loaded
     if (fontsLoaded && authLoaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, authLoaded])
+  }, [fontsLoaded, authLoaded]);
 
   // Don't render app until both are ready
   if (!fontsLoaded || !authLoaded) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {sessionId ? (
+        // User is signed in - show app stack
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      ) : (
+        // User is not signed in - show auth stack
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      )}
+    </Stack>
+  );
 }
 
 export default function RootLayout() {
@@ -69,7 +87,7 @@ export default function RootLayout() {
       autocapture={{
         captureScreens: false,
         captureTouches: true,
-        propsToCapture: ['testID'],
+        propsToCapture: ["testID"],
       }}
     >
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
